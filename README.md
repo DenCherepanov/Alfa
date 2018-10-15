@@ -3,8 +3,7 @@
   - Delphi7
   - Allround Automations Direct Oracle Access (ver. 4.1)
   - DevExpress (ver. 14.1.3)
-  - Oracle 11gXE (насколько я понял вы используете такую версию)
-  - DataGrip [DataGrip](https://www.jetbrains.com/datagrip/) (для импорта данных из csv файлов - папка "Data")
+  - Oracle 11gXE.
 
 # Запуск скриптов
 
