@@ -72,7 +72,6 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure ConnectDB;
-    procedure Init;
     procedure btnConnectClick(Sender: TObject);
     procedure btnRefreshClick(Sender: TObject);
     procedure cxTreeCityClick(Sender: TObject);
@@ -110,7 +109,8 @@ procedure TFMain.FormCreate(Sender: TObject);
 begin
  ConnectDB;
  btnRefreshClick(self);
- Init;
+ InitGrid(FMain.cxGridTableView,4);
+ InitGrid(FMain.cxGridTableView1,3);
 end;
 
 // процедура проверки соединение с сервером
@@ -124,6 +124,7 @@ end;
 
 procedure TFMain.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+ // завершаем сессию
  OracleSession.LogOff;
 end;
 
@@ -132,6 +133,7 @@ begin
  ConnectDB;
 end;
 
+// заполняем дерево населенными пунктами
 procedure TFMain.btnRefreshClick(Sender: TObject);
 var
  tn:TTreeNode;
@@ -161,21 +163,7 @@ begin
  end;
 end;
 
-procedure TFMain.Init;
-begin
- // инициализация грида улиц
- cxGridTableView.Columns[0].Width:=16;
- cxGridTableView.Columns[1].Width:=150;
- cxGridTableView.Columns[2].Width:=150;
- cxGridTableView.Columns[3].Width:=150;
- cxGridTableView.Columns[4].Width:=150;
- // инициализация грида застрахованных лиц
- cxGridTableView1.Columns[0].Width:=16;
- cxGridTableView1.Columns[1].Width:=150;
- cxGridTableView1.Columns[2].Width:=150;
- cxGridTableView1.Columns[3].Width:=150;
-end;
-
+// заполняем грид с улицами
 procedure TFMain.cxTreeCityClick(Sender: TObject);
 var
   K: Integer;
@@ -208,11 +196,17 @@ begin
      inc(K);
      OracleQuery.Next;
     end;
-  finally
    cxGridTableView.DataController.EndUpdate;
+  except
+   on E: EOracleError do
+    begin
+     ShowMessage(E.Message);
+     dxStatusBar.Panels[1].Text:=E.Message;
+    end;
   end;
 end;
 
+// выполняем объединение улиц
 procedure TFMain.N1Click(Sender: TObject);
 var
  tn:TTreeNode;
@@ -229,6 +223,7 @@ begin
   end;
 
  if MessageDlg('Сделать улицу ' + cxGridTableView.Controller.SelectedRows[0].Values[2] + ' (' + cxGridTableView.Controller.SelectedRows[0].Values[1] + ') ' + ' главной?',mtConfirmation,mbOkCancel,0)=mrCancel then exit;
+
  tn:=cxTreeCity.Selected;
  if tn=nil then exit;
  OracleQuery.Clear;
@@ -248,6 +243,7 @@ begin
  end;
 end;
 
+// устанавливаем цвет для header грида с улицами
 procedure TFMain.cxGridTableViewCustomDrawColumnHeader(
   Sender: TcxGridTableView; ACanvas: TcxCanvas;
   AViewInfo: TcxGridColumnHeaderViewInfo; var ADone: Boolean);
@@ -263,6 +259,7 @@ begin
   end;
 end;
 
+// отображение соответствующей иконки в первом столбце гридов для улиц и застрахованных лиц
 procedure TFMain.cxGridTableViewCustomDrawCell(
   Sender: TcxCustomGridTableView; ACanvas: TcxCanvas;
   AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
@@ -283,7 +280,6 @@ begin
   end;
  If AViewInfo.Item.Name = clmn_name then
   Begin
-   //If (AViewInfo.GridRecord.Values[4] = 0) then если нужно проверить значение конкретного столбца
 	 R := AViewInfo.Bounds;
 	 ACanvas.Brush.Color := AViewInfo.Params.Color;
 	 ACanvas.FillRect(R);
@@ -294,6 +290,7 @@ begin
  end;
 end;
 
+// заполняем грид застрахованных лиц
 procedure TFMain.cxGridTableViewCellClick(Sender: TcxCustomGridTableView;
   ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
   AShift: TShiftState; var AHandled: Boolean);
@@ -311,7 +308,7 @@ begin
  K:=0;
  try
   OracleQuery.Execute;
-  while not OracleQuery.EOF do
+  while not OracleQuery.EOF do                                          
    begin
     cxGridTableView1.DataController.AppendRecord;
     cxGridTableView1.DataController.Values [K , cxGridTableView1Column2.Index] := OracleQuery.FieldAsString('CODEPEOPLE');
@@ -320,28 +317,37 @@ begin
     inc(K);
     OracleQuery.Next;
    end;
- finally
   cxGridTableView1.DataController.EndUpdate;
+ except
+  on E: EOracleError do
+   begin
+    ShowMessage(E.Message);
+    dxStatusBar.Panels[1].Text:=E.Message;
+   end;
  end;
 end;
 
+// просмотр истории перекодировок улиц
 procedure TFMain.MenuItem1Click(Sender: TObject);
 begin
  FViewHistory:=TFViewHistory.create(self);
  with FViewHistory do ShowModal;
 end;
-
+                                              
+// обработки кнопки фильтра
 procedure TFMain.btnFilterClick(Sender: TObject);
 begin
  cxTreeCityClick(self);
 end;
 
+// обработка кнопки сброса фильтра
 procedure TFMain.btnFilterCancelClick(Sender: TObject);
 begin
  cxTextEdit.Text:='';
  cxTreeCityClick(self);
 end;
 
+// скрываем заблокированные улицы
 procedure TFMain.cxCheckBox1Click(Sender: TObject);
 begin
  cxTreeCityClick(self);
