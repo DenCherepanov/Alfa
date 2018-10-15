@@ -1,0 +1,69 @@
+Приложены файлы с входными данными:
+
+1.       Список населенных пунктов SCity
+
+2.       Список улиц SStreet
+
+3.       Список застрахованных PeopleStreet
+
+ 
+
+Цель задания:
+
+1.       Объединение похожих улиц из SSreet  
+
+2.       Перекодировка улиц для застрахованных PeopleStreet
+
+3.       Заполнение таблицы истории перекодировки DecodeStreet
+
+ 
+
+Описание алгоритма:
+
+1.       Выбираем населенных пункт из SCity
+
+2.       На основе SCity.CodeCity выбираем из SStreet.CodeCity по CodeCity список улиц (где SStreet.Enabled=1)
+
+3.       Начинаем работать по списку улиц:
+
+3.1   Ищем  похожие улицы (по вхождению или «похожести» - алгоритм на усмотрение ) и отмечаем их
+
+3.2   Выбираем - в какую улицу («главная улица»)преобразовать все выбранные улицы
+
+3.3   Нажимаем кнопку «Объединение» и выполняем объединение.
+
+3.3.1 update SStreet.Enabled=0 – все улицы, кроме «главной улицы»
+
+3.3.2 update PeopleStreet.CodeStreetR=”главная улица”, где PeopleStreet.CodeStreetR=<список выбранных улиц для перекодировки из п.3.1.>
+
+          update PeopleStreet.CodeStreetF =”главная улица” , где PeopleStreet.CodeStreetF=<список выбранных улиц для перекодировки из п.3.1.>
+
+3.3.3          insert DecodeStreet
+
+DecodeStreet.OldStreetR =  PeopleStreet.CodeStreetR код улицы (регистрации) до перекодировки (п. 3.3.2)
+DecodeStreet.OldStreetF =  PeopleStreet.CodeStreetF код улицы (факт. проживания) до перекодировки (п. 3.3.2)
+
+DecodeStreet.NewStreetR =  PeopleStreet.CodeStreetR код улицы (регистрации) после перекодировки (п. 3.3.2)
+DecodeStreet.NewStreetF =  PeopleStreet.CodeStreetF код улицы (факт. проживания) после перекодировки (п. 3.3.2)
+
+3.4 Переходим к  п. 3.1
+
+ 
+
+Результат выполнения:
+
+1.       Заблокированные лишние улицы SStreet.Enabled=0
+
+2.       Измененные улицы в списке застрахованных PeopleStreet.CodeStreetR, PeopleStreet.CodeStreetF
+
+3.       Список произведенных перекодировок, сохраненный в DecodeStreet
+
+ 
+
+Желательно использовать ПО:
+
+Delphi 7
+
+Allround Automations Direct Oracle Access
+
+DevExpress
