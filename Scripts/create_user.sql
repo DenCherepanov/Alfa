@@ -11,11 +11,8 @@ ALTER USER tst quota unlimited on tbs_01;
 
 GRANT create session TO tst;
 GRANT create table TO tst;
-GRANT create view TO tst;
 GRANT create trigger TO tst;
 GRANT create procedure TO tst;
-GRANT create sequence TO tst;
-GRANT create synonym TO tst;
 
 GRANT ALTER ANY table TO tst;
 GRANT ALTER ANY trigger TO tst;
@@ -25,7 +22,3 @@ GRANT DELETE ANY TABLE TO tst;
 GRANT DROP ANY TABLE TO tst;
 GRANT DROP ANY PROCEDURE TO tst;
 GRANT DROP ANY TRIGGER TO tst;
-GRANT DROP ANY VIEW TO tst;
-
---drop tablespace tbs_01;
---drop user tst cascade;

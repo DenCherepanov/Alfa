@@ -21,7 +21,7 @@ uses
   dxSkinVS2010, dxSkinWhiteprint, dxSkinXmas2008Blue, dxSkinscxPCPainter,
   cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, cxNavigator,
   cxGridLevel, cxGridCustomTableView, cxGridTableView, cxClasses,
-  cxGridCustomView, cxGrid;
+  cxGridCustomView, cxGrid, Oracle;
 
 type
   TFViewHistory = class(TForm)
@@ -33,9 +33,7 @@ type
     cxGridTableView1Column4: TcxGridColumn;
     cxGridLevel1: TcxGridLevel;
     cxGridTableView1Column5: TcxGridColumn;
-    procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
-    procedure Init;
     procedure FilGrid;
     procedure FormKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
@@ -45,6 +43,7 @@ type
     procedure cxGridTableView1CustomDrawCell(
       Sender: TcxCustomGridTableView; ACanvas: TcxCanvas;
       AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
+    procedure FormShow(Sender: TObject);
   private
     { Private declarations }
   public
@@ -61,28 +60,13 @@ uses Umain,
 
 {$R *.dfm}
 
-procedure TFViewHistory.FormCreate(Sender: TObject);
-begin
- Init;
- FilGrid;
-end;
-
 procedure TFViewHistory.FormClose(Sender: TObject;
   var Action: TCloseAction);
 begin
- Action:=caFree;
+ close;
 end;
 
-procedure TFViewHistory.Init;
-begin
- // инициализация грида улиц
- cxGridTableView1.Columns[0].Width:=16;
- cxGridTableView1.Columns[1].Width:=150;
- cxGridTableView1.Columns[2].Width:=150;
- cxGridTableView1.Columns[3].Width:=150;
- cxGridTableView1.Columns[4].Width:=150;
-end;
-
+// заполнение грида истории перекодировок улиц
 procedure TFViewHistory.FilGrid;
 var
   K: Integer;
@@ -107,17 +91,24 @@ begin
      inc(K);
      FMain.OracleQuery.Next;
     end;
-  finally
    cxGridTableView1.DataController.EndUpdate;
-  end;
+  except
+   on E: EOracleError do
+   begin
+    ShowMessage(E.Message);
+    FMain.dxStatusBar.Panels[1].Text:=E.Message;
+   end;
+ end;
 end;
 
+// закрываем окно по нажатой клавише Esc
 procedure TFViewHistory.FormKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
- if key=27 then close;
+ if key=27 then close;   
 end;
 
+// устанавливаем цвет для header грида с историей перекодировок улиц
 procedure TFViewHistory.cxGridTableView1CustomDrawColumnHeader(
   Sender: TcxGridTableView; ACanvas: TcxCanvas;
   AViewInfo: TcxGridColumnHeaderViewInfo; var ADone: Boolean);
@@ -133,6 +124,7 @@ begin
   end;
 end;
 
+// отображение соответствующей иконки в первом столбце грида с историей перекодировок улиц
 procedure TFViewHistory.cxGridTableView1CustomDrawCell(
   Sender: TcxCustomGridTableView; ACanvas: TcxCanvas;
   AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
@@ -156,6 +148,12 @@ begin
 	 ACanvas.DrawImage(FMain.cxImageList1,r.Left+2,r.Top,img_index,True);
 	 ADone := True ;
  end;
+end;
+
+procedure TFViewHistory.FormShow(Sender: TObject);
+begin
+ InitGrid(FViewHistory.cxGridTableView1,4);
+ FilGrid;
 end;
 
 end.

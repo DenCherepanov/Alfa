@@ -52,7 +52,6 @@ create global temporary table TEMP_BUF
 on commit preserve rows
 /
 
--- три добавляющий записи в таблицу DECODESTREET
 create or replace trigger INSERT_HISTORY
   before update of CODESTREETR, CODESTREETF
   on PEOPLESTREET
